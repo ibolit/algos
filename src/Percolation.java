@@ -62,30 +62,26 @@ public class Percolation {
 
         if (row == 1) {
             gridTop[index] = rootTop;
-            int lowestNeighbouringParent = lowestNeighbouringParent(gridBottom, index);
-            gridBottom[index] = getParent(gridBottom, lowestNeighbouringParent);
+            unionWithNeighbours(gridTop, index);
+            unionWithNeighbours(gridBottom, index);
         } else if (row == n) {
             gridBottom[index] = rootBottom;
-            int lowestNeighbouringParent = lowestNeighbouringParent(gridTop, index);
-            gridTop[index] = getParent(gridTop, lowestNeighbouringParent);
+            unionWithNeighbours(gridTop, index);
+            unionWithNeighbours(gridBottom, index);
         } else {
-            int lowestNeighbouringParent = lowestNeighbouringParent(gridTop, index);
-            gridTop[index] = getParent(gridTop, lowestNeighbouringParent);
-
-            lowestNeighbouringParent = lowestNeighbouringParent(gridBottom, index);
-            gridBottom[index] = getParent(gridBottom, lowestNeighbouringParent);
+            unionWithNeighbours(gridTop, index);
+            unionWithNeighbours(gridBottom, index);
         }
         if(
-                getParent(gridBottom, index) == rootBottom &&
-                getParent(gridTop, index) == rootTop
+                find(gridBottom, index) == rootBottom &&
+                find(gridTop, index) == rootTop
         ) {
             percolates = true;
         }
     }
 
 
-    private int lowestNeighbouringParent(int[] grid, int index) {
-        int lowestParent = this.length;
+    private void unionWithNeighbours(int[] grid, int index) {
         int indexDivision = index / this.n;
 
         for(int offset : offsets) {
@@ -98,19 +94,26 @@ public class Percolation {
                 }
             }
             if(candidate >= 0 && candidate < length) {
-                if(grid[candidate] < lowestParent && gridOpen[candidate] == OPEN) {
-                    lowestParent = grid[candidate];
+                if(gridOpen[candidate] == OPEN) {
+                    union(grid, candidate, index);
                 }
             }
         }
-        if(lowestParent == length) {
-            return index;
-        }
-        return lowestParent;
     }
 
 
-    private int getParent(int[] grid, int index) {
+    private void union(int[] grid, int p, int q) {
+        int p_parent = find(grid, p);
+        int q_parent = find(grid, q);
+        if(p_parent > q_parent) {
+            grid[p] = q_parent;
+        } else {
+            grid[q] = p_parent;
+        }
+    }
+
+
+    private int find(int[] grid, int index) {
         if(index < 0) {
             return index;
         }
@@ -118,7 +121,7 @@ public class Percolation {
         if(parent == index || parent < 0) {
             return parent;
         }
-        parent = getParent(grid, parent);
+        parent = find(grid, parent);
         grid[index] = parent;
         return parent;
     }
