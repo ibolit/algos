@@ -1,31 +1,29 @@
-import java.util.ArrayList;
-import java.util.List;
+public class Percolation {
+    private int[] parentsGrid;
+    private int[] opennessGrid;
 
-public class Grid {
-    private int[] parents_grid;
-    private int[] openness_grid;
-
-    private final int top_root = -1;
-    private final int bottom_root = -2;
+    private final int topRoot = -1;
+    private final int bottomRoot = -2;
     private final int size;
     private boolean percolates = false;
     private final int[] offsets;
     private int numOfOpenSites = 0;
 
 
-    public Grid(int size) {
+    public Percolation(int size) {
         this.size = size;
         int length = size * size;
 
-        parents_grid = new int[length];
-        openness_grid = new int[length];
+        parentsGrid = new int[length];
+        opennessGrid = new int[length];
 
         for (int i = 0; i < length; i++) {
-            parents_grid[i] = i;
-            openness_grid[i] = 0;
+            parentsGrid[i] = i;
+            opennessGrid[i] = 0;
         }
         offsets = new int[]{-size, -1, 1, size};
     }
+
 
     private int translateCoords(int row, int col) {
         checkCoords(row, col);
@@ -41,6 +39,7 @@ public class Grid {
         }
     }
 
+
     private int valueAt(int row, int col, int[] grid) {
         return grid[translateCoords(row, col)];
     }
@@ -52,7 +51,7 @@ public class Grid {
 
 
     public boolean isOpen(int row, int col) {
-        return valueAt(row, col, openness_grid) == 1;
+        return valueAt(row, col, opennessGrid) == 1;
     }
 
 
@@ -65,6 +64,11 @@ public class Grid {
         return numOfOpenSites;
     }
 
+
+    public boolean percolates() {
+        return this.percolates;
+    }
+
     public void open(int row, int col) {
         if(isOpen(row, col)) {
             return;
@@ -72,31 +76,32 @@ public class Grid {
         int index = translateCoords(row, col);
 
         if (row == 1) {
-            parents_grid[index] = top_root;
+            parentsGrid[index] = topRoot;
         }
         if (row == size) {
-            parents_grid[index] = bottom_root;
+            parentsGrid[index] = bottomRoot;
         }
 
-        openness_grid[index] = 1;
+        opennessGrid[index] = 1;
         numOfOpenSites++;
 
         int[] neighbours = getNeighbours(index);
         checkPercolates(neighbours);
-        int minParent = min(parents_grid[index], minParent(neighbours));
-        parents_grid[index] = minParent;
+        int minParent = min(parentsGrid[index], minParent(neighbours));
+        parentsGrid[index] = minParent;
 
-        for(int i = 0; i < parents_grid.length; i++) {
+        for(int i = 0; i < parentsGrid.length; i++) {
             for(int parent : neighbours) {
                 if(parent < 0) {
                     break;
                 }
-                if(parents_grid[i] == parent) {
-                    parents_grid[i] = minParent;
+                if(parentsGrid[i] == parent) {
+                    parentsGrid[i] = minParent;
                 }
             }
         }
     }
+
 
     private void checkPercolates(int[] neighbours) {
         if(percolates) {
@@ -107,7 +112,7 @@ public class Grid {
             if(i < 0) {
                 return;
             }
-            if(i >= 0 && parents_grid[i] < 0) {
+            if(i >= 0 && parentsGrid[i] < 0) {
                 counter++;
             }
         }
@@ -127,10 +132,10 @@ public class Grid {
 
 
     private int minParent(int[] indexes) {
-        int minParent = parents_grid.length;
+        int minParent = parentsGrid.length;
         for (int i : indexes) {
             if (i >= 0) {
-                minParent = min(parents_grid[i], minParent);
+                minParent = min(parentsGrid[i], minParent);
             }
         }
         return minParent;
@@ -151,18 +156,14 @@ public class Grid {
          for(int i = 0; i < offsets.length; i++) {
             int candidate = index + offsets[i];
             if (modulo(offsets[i]) == 1) {
-                if (modulo(index % size - candidate % size ) != 1 || candidate < 0 || candidate > parents_grid.length) {
-//                    ret[i] = -1;
+                if (modulo(index % size - candidate % size ) != 1 || candidate < 0 || candidate > parentsGrid.length) {
                     continue;
                 }
-            } else if(candidate < 0 || candidate > parents_grid.length) {
-//                ret[i] = -1;
+            } else if(candidate < 0 || candidate > parentsGrid.length) {
                 continue;
             }
-            if(openness_grid[candidate] == 1) {
+            if(opennessGrid[candidate] == 1) {
                 ret[neighbourIndex] = candidate;
-            } else {
-//                ret[i] = -1;
             }
             neighbourIndex++;
          }
@@ -173,11 +174,11 @@ public class Grid {
     }
 
     public static void main(String[] args) {  // test client (optional)
-        Grid grid = new Grid(5);
-        grid.open(1, 3);
-        grid.open(5, 3);
-        grid.open(4, 3);
-        grid.open(2, 3);
-        grid.open(3, 3);
+        Percolation percolation = new Percolation(5);
+        percolation.open(1, 3);
+        percolation.open(5, 3);
+        percolation.open(4, 3);
+        percolation.open(2, 3);
+        percolation.open(3, 3);
     }
 }
